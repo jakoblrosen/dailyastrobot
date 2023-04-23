@@ -1,9 +1,9 @@
 import os
-import csv
 import time
-import random
 import requests
+import random
 import schedule
+import couchdb
 import tweepy
 
 from pathlib import Path
@@ -11,16 +11,19 @@ from dotenv import load_dotenv
 
 
 def get_galaxy():
-    with open('info.csv', 'r') as in_file:
-        reader = list(csv.reader(in_file))
-        random.shuffle(reader)
-        reader = iter(reader)
-        galaxy = next(reader)
-        with open('info.new', 'w') as out_file:
-            for row in reader:
-                out_file.write(','.join(str(item) for item in row))
-                out_file.write('\n')
-    os.rename('info.new', 'info.csv')
+    dotenv_path = Path('db.env')
+    load_dotenv(dotenv_path=dotenv_path)
+
+    COUCH_USER = os.getenv('COUCH_USER')
+    COUCH_PASSWORD = os.getenv('COUCH_PASSWORD')
+    COUCH_HOST = os.getenv('COUCH_HOST')
+    COUCH_PORT = os.getenv('COUCH_PORT')
+    couch = couchdb.Server(f'http://{COUCH_USER}:{COUCH_PASSWORD}@{COUCH_HOST}:{COUCH_PORT}')
+    db = couch['dailyastrobotdb']
+    galaxy_ids = [id for id in db]
+    galaxy_id = random.choice(galaxy_ids)
+    galaxy = dict(db[galaxy_id].items())
+    del db[galaxy_id]
     return galaxy
 
 
@@ -49,29 +52,29 @@ def job():
 
     try:
         galaxy = get_galaxy()
-        galaxy_id = galaxy[0]
-        galaxy_name = galaxy[1]
-        distance = float(galaxy[2])         # stored as Mly
-        PHOTO_URL = galaxy[3]
-        fname = f'media/{PHOTO_URL.split("/")[-1]}'
-        photo = requests.get(PHOTO_URL)
+        galaxy_name = galaxy.get('name')
+        galaxy_code = galaxy.get('code')
+        distance = galaxy.get('distance')
+        image_url = galaxy.get('image_url')
+        fname = f'media/{image_url.split("/")[-1]}'
+        photo = requests.get(image_url)
         open(fname, 'wb').write(photo.content)
 
         NEWLINE = '\n'
         time_to_reach = calculate_time(distance, CURRENT_SPACE_TRAVEL_SPEED)
-        message = f'{galaxy_name} ({galaxy_id}){NEWLINE}' \
+        message = f'{galaxy_name} ({galaxy_code}){NEWLINE}' \
                   f'Distance: {distance} megalight-years{NEWLINE}' \
                   f'{time_to_reach} years to reach at our current space travel speed'
 
         media = api.simple_upload(fname)
         api.update_status(status=message, media_ids=[media.media_id])
+        print(message)
         print(f'chirp @ {time.asctime()}')
     except Exception as err:
         print(f'error @ {time.asctime()} : {err}')
 
 
 def main():
-    job()
     schedule.every().day.at('12:00').do(job)
     while True:
         schedule.run_pending()

@@ -1,8 +1,8 @@
 # Media stored by bot
 media/*
 
-# Environment variables for Twitter API
-secrets.env
+# Environment variables for Twitter API and CouchDB
+*.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
