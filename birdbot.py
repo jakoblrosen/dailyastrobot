@@ -61,11 +61,11 @@ def job():
         open(fname, 'wb').write(photo.content)
 
         time_to_reach = calculate_time(distance, current_space_travel_speed)
-        time_to_reach_relative = calculate_relative_time(time_to_reach, 0.95)
+        time_to_reach_relative = calculate_relative_time(time_to_reach, 0.999)
         message = (f'{galaxy_name} ({galaxy_code})\n'
                    f'Distance: {distance} megalight-years\n'
-                   f'{time_to_reach} years to reach at our current space travel speed\n'
-                   f'{time_to_reach_relative} years to reach at 95% the speed of light')
+                   f'{int(time_to_reach / 1e9)} billion years to reach at our current space travel speed\n'
+                   f'{int(time_to_reach_relative / 1e6)} million years to reach at 99.9% the speed of light')
 
         media = api.simple_upload(fname)
         api.update_status(status=message, media_ids=[media.media_id])
