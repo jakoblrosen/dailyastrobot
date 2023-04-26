@@ -47,7 +47,7 @@ def job():
     auth.set_access_token(os.getenv('ACCESS_TOKEN'), os.getenv('ACCESS_TOKEN_SECRET'))
     api = tweepy.API(auth)
 
-    current_space_travel_speed = 6.92e5  # stored as km/h
+    current_space_travel_speed = 3.99e4     # stored as km/h
 
     try:
         galaxy = get_galaxy()
@@ -63,7 +63,7 @@ def job():
         time_to_reach_relative = calculate_relative_time(distance, 0.999)
         message = (f'{galaxy_name} ({galaxy_code})\n'
                    f'Distance: {distance} megalight-years\n'
-                   f'{round(time_to_reach / 1e9, 3)} billion years to reach at our current space travel speed\n'
+                   f'{round(time_to_reach / 1e9, 3)} billion years to reach at our current fastest space travel speed (Apollo 10 mission)\n'
                    f'{round(time_to_reach_relative / 1e6, 3)} million years to reach at 99.9% the speed of light')
 
         media = api.simple_upload(fname)
