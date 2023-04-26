@@ -1,7 +1,6 @@
 import os
 import math
 import time
-import logging
 import requests
 import random
 import schedule
@@ -35,7 +34,8 @@ def calculate_time(distance, speed):
 
 
 # calculate relativistic time given time and percentage of speed of light
-def calculate_relative_time(delta, c_percent):
+def calculate_relative_time(distance, c_percent):
+    delta = (distance * 1e6) / c_percent
     return int(delta * math.sqrt(1 - c_percent ** 2))
 
 
@@ -48,7 +48,6 @@ def job():
     api = tweepy.API(auth)
 
     current_space_travel_speed = 6.92e5  # stored as km/h
-    log = logging.getLogger('dailyastrobot')
 
     try:
         galaxy = get_galaxy()
@@ -61,21 +60,21 @@ def job():
         open(fname, 'wb').write(photo.content)
 
         time_to_reach = calculate_time(distance, current_space_travel_speed)
-        time_to_reach_relative = calculate_relative_time(time_to_reach, 0.999)
+        time_to_reach_relative = calculate_relative_time(distance, 0.999)
         message = (f'{galaxy_name} ({galaxy_code})\n'
                    f'Distance: {distance} megalight-years\n'
-                   f'{int(time_to_reach / 1e9)} billion years to reach at our current space travel speed\n'
-                   f'{int(time_to_reach_relative / 1e6)} million years to reach at 99.9% the speed of light')
+                   f'{round(time_to_reach / 1e9, 3)} billion years to reach at our current space travel speed\n'
+                   f'{round(time_to_reach_relative / 1e6, 3)} million years to reach at 99.9% the speed of light')
 
         media = api.simple_upload(fname)
         api.update_status(status=message, media_ids=[media.media_id])
-        log.info(f'chirp @ {time.asctime()}')
+        print(message)
+        print(f'chirp @ {time.asctime()}')
     except Exception as err:
-        log.warning(f'error @ {time.asctime()} : {err}')
+        print(f'error @ {time.asctime()} : {err}')
 
 
 def main():
-    logging.Logger('dailyastrobot')
     schedule.every().day.at('12:00').do(job)
     while True:
         schedule.run_pending()
