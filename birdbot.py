@@ -63,7 +63,7 @@ def job():
         time_to_reach_relative = calculate_relative_time(distance, 0.999)
         message = (f'{galaxy_name} ({galaxy_code})\n'
                    f'Distance: {distance} megalight-years\n'
-                   f'{round(time_to_reach / 1e9, 3)} billion years to reach at our current fastest space travel speed (Apollo 10 mission)\n'
+                   f'{round(time_to_reach / 1e9, 3) if (time_to_reach / 1e9) < 1000 else round(time_to_reach / 1e12, 3)} {"billion" if (time_to_reach / 1e9) < 1000 else "trillion"} years to reach at our current fastest space travel speed (Apollo 10 mission)\n'
                    f'{round(time_to_reach_relative / 1e6, 3)} million years to reach at 99.9% the speed of light')
 
         media = api.simple_upload(fname)
