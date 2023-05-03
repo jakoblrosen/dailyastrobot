@@ -12,3 +12,8 @@ Then, the time to the galaxy is given from the following equation...
 ```math
 y = {distance \over speed} = {Mly \over {Mly \over y}}
 ```
+
+The relativistic time is calculated by first calculated the time it would take from an outside observer, and then dividing that number by the lorentz factor, in order to get the time experienced by the traveler. This is done with the following equation...
+```math
+T = {T_O \over \gamma} = {Mly \over % of c} \sqrt{1-{v^2 \over c^2}}
+```
